@@ -160,15 +160,23 @@ export class UserController {
     );
     try {
       if (fileName) {
-        await this.userRepository.updateById(currentUser.id, {
-          imgUrl: fileName,
-          updatedAt: new Date(),
-        });
+        await this.userRepository
+          .updateById(currentUser.id, {
+            imgUrl: fileName,
+            updatedAt: new Date(),
+          })
+          .catch(err => {
+            throw new AppResponse({code: 500});
+          });
       } else {
-        await this.userRepository.updateById(currentUser.id, {
-          imgUrl: 'default.png',
-          updatedAt: new Date(),
-        });
+        await this.userRepository
+          .updateById(currentUser.id, {
+            imgUrl: 'default.png',
+            updatedAt: new Date(),
+          })
+          .catch(err => {
+            throw new AppResponse({code: 500});
+          });
       }
 
       if (user.imgUrl !== 'default.png') {
@@ -180,11 +188,17 @@ export class UserController {
       }
     } catch (error) {
       if (request.file) {
-        Upload.productImgStorage._removeFile(request, request.file, err => {});
+        Upload.userImgStorage._removeFile(request, request.file, err => {});
       }
+      try {
+        fs.unlinkSync(
+          Helper.getImageUrlLocal(Upload.storeImageFolder, fileName),
+        );
+      } catch (error) {}
       throw error;
     }
-    user.imgUrl = fileName;
+    user.imgUrl = (fileName && fileName) || 'default.png';
+    console.log(user);
     return new AppResponse({data: new RespUserInfoModel(user)});
   }
 

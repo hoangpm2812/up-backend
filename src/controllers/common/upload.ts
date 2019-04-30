@@ -44,7 +44,6 @@ export class Upload {
   ) {
     let err = validateImage(file);
     let filename = randomImageName(file);
-    console.log(filename);
     if (filename === '') err = new Error('server error');
     callback(err, filename);
   }
@@ -70,20 +69,26 @@ export class Upload {
     request: Request,
     response: Response,
   ) {
-    const upload = multer({storage: storage}).single(fieldName);
+    const upload = multer({
+      storage: storage,
+      limits: {fileSize: 5242880},
+    }).single(fieldName);
     return new Promise<string>((resolve, reject) => {
       upload(request, response, err => {
-        console.log(err);
-        if (err && err instanceof Error) {
-          if (err.message.startsWith('client')) {
-            reject(new AppResponse({code: 400, message: 'Invalid image'}));
+        if (err) {
+          if (err instanceof Error) {
+            if (err.message.startsWith('client')) {
+              reject(new AppResponse({code: 400, message: 'Invalid image'}));
+            } else {
+              reject(new AppResponse({code: 500}));
+            }
           } else {
-            reject(new AppResponse({code: 500}));
+            reject(err);
           }
-        } else if (err) {
-          reject(err);
+        } else {
+          console.log((request.file && request.file.filename) || undefined);
+          resolve((request.file && request.file.filename) || undefined);
         }
-        resolve((request.file && request.file.filename) || undefined);
       });
     }).catch(reason => {
       throw reason;

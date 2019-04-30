@@ -177,8 +177,13 @@ export class StoreController {
       }
     } catch (error) {
       if (request.file) {
-        Upload.productImgStorage._removeFile(request, request.file, err => {});
+        Upload.storeImgStorage._removeFile(request, request.file, err => {});
       }
+      try {
+        fs.unlinkSync(
+          Helper.getImageUrlLocal(Upload.storeImageFolder, fileName),
+        );
+      } catch (error) {}
       throw error;
     }
     store.imgUrl = (fileName && fileName) || 'default.png';
@@ -270,6 +275,11 @@ export class StoreController {
       if (request.file) {
         Upload.productImgStorage._removeFile(request, request.file, err => {});
       }
+      try {
+        fs.unlinkSync(
+          Helper.getImageUrlLocal(Upload.productImageFolder, fileName),
+        );
+      } catch (error) {}
       throw error;
     }
     return new AppResponse();
@@ -336,6 +346,11 @@ export class StoreController {
       if (request.file) {
         Upload.productImgStorage._removeFile(request, request.file, err => {});
       }
+      try {
+        fs.unlinkSync(
+          Helper.getImageUrlLocal(Upload.productImageFolder, fileName),
+        );
+      } catch (error) {}
       throw error;
     }
     return new AppResponse();
