@@ -23,5 +23,5 @@ export class Constant {
     BAN: 'ban',
   };
 
-  static HOST = 'http://107.113.187.124:3000/';
+  static HOST = 'http://35.185.47.170:3000/';
 }
